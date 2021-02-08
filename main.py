@@ -1,10 +1,8 @@
 from sin_wawe import sin_wawe
 import time
-import matplotlib.pyplot as plt
-from chart_type_1 import figure_1
-from chart_type_1_1 import figure_1_1, figure_1_1_init, figure_1_1_input
-import chart_type_1_2
-from chart_type_2 import figure_2
+
+import dynamic_chart
+from static_chart import figure_2
 
 
 
@@ -25,7 +23,7 @@ def main():
 #------------------------------------------------2
 
 #------------------------------------------------3
-    chart = chart_type_1_2.chart()
+    chart = dynamic_chart.chart()
     while True:
         output = sin_wawe(10, 0, 10, time.process_time())  # amplitude, offset, period
         chart.figure_get_input(output)
