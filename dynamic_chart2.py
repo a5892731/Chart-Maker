@@ -1,11 +1,5 @@
-###################################################################
-#                                                                 #
-#                    PLOT A LIVE GRAPH (PyQt5)                    #
-#                  -----------------------------                  #
-#            EMBED A MATPLOTLIB ANIMATION INSIDE YOUR             #
-#            OWN GUI!                                             #
-#                                                                 #
-###################################################################
+#source: https://stackoverflow.com/questions/11874767/how-do-i-plot-in-real-time-in-a-while-loop-using-matplotlib
+
 
 import sys
 import os
@@ -25,34 +19,30 @@ import time
 import threading
 
 class CustomMainWindow(QMainWindow):
+
+    version = "1.3"
+    chart_title = "Chart 1:"
+
     def __init__(self):
         super(CustomMainWindow, self).__init__()
         # Define the geometry of the main window
         self.setGeometry(300, 300, 800, 400)
-        self.setWindowTitle("my first window")
+        self.setWindowTitle(self.chart_title)
         # Create FRAME_A
         self.FRAME_A = QFrame(self)
         self.FRAME_A.setStyleSheet("QWidget { background-color: %s }" % QColor(210,210,235,255).name())
         self.LAYOUT_A = QGridLayout()
         self.FRAME_A.setLayout(self.LAYOUT_A)
         self.setCentralWidget(self.FRAME_A)
-        # Place the zoom button
-        self.zoomBtn = QPushButton(text = 'zoom')
-        self.zoomBtn.setFixedSize(100, 50)
-        self.zoomBtn.clicked.connect(self.zoomBtnAction)
-        self.LAYOUT_A.addWidget(self.zoomBtn, *(0,0))
         # Place the matplotlib figure
         self.myFig = CustomFigCanvas()
         self.LAYOUT_A.addWidget(self.myFig, *(0,1))
         # Add the callbackfunc to ..
-        myDataLoop = threading.Thread(name = 'myDataLoop', target = dataSendLoop, daemon = True, args = (self.addData_callbackFunc,))
+
+
+        myDataLoop = threading.Thread(name = 'myDataLoop', target = dataSendLoop, daemon = True, args = (self.addData_callbackFunc,)) ## <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<DATA
         myDataLoop.start()
         self.show()
-        return
-
-    def zoomBtnAction(self):
-        print("zoom in")
-        self.myFig.zoomIn(5)
         return
 
     def addData_callbackFunc(self, value):
@@ -62,11 +52,12 @@ class CustomMainWindow(QMainWindow):
 
 ''' End Class '''
 
-
 class CustomFigCanvas(FigureCanvas, TimedAnimation):
+
+    raw_data = "Amplitude"
+
     def __init__(self):
         self.addedData = []
-        print(matplotlib.__version__)
         # The data
         self.xlim = 200
         self.n = np.linspace(0, self.xlim - 1, self.xlim)
@@ -84,7 +75,7 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
         self.ax1 = self.fig.add_subplot(111)
         # self.ax1 settings
         self.ax1.set_xlabel('time')
-        self.ax1.set_ylabel('raw data')
+        self.ax1.set_ylabel(self.raw_data)
         self.line1 = Line2D([], [], color='blue')
         self.line1_tail = Line2D([], [], color='red', linewidth=2)
         self.line1_head = Line2D([], [], color='red', marker='o', markeredgecolor='r')
@@ -108,15 +99,6 @@ class CustomFigCanvas(FigureCanvas, TimedAnimation):
 
     def addData(self, value):
         self.addedData.append(value)
-        return
-
-    def zoomIn(self, value):
-        bottom = self.ax1.get_ylim()[0]
-        top = self.ax1.get_ylim()[1]
-        bottom += value
-        top -= value
-        self.ax1.set_ylim(bottom,top)
-        self.draw()
         return
 
     def _step(self, *args):

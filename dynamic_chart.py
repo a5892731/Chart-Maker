@@ -7,7 +7,7 @@ comments: poor refreshment, works very badly when calling two plots
 import time
 import matplotlib.pyplot as plt
 
-class chart():
+class Chart():
     version = "1.2"
     chart_title = "Chart 1:"
     chart_len = 10
