@@ -45,7 +45,7 @@ class Chart():
         self.chart_data["axis"].set_xlim(left=left, right=right)
 
     def __del__(self):
-        #self.chart_data["figure"].clear()
+        self.chart_data["figure"].clear()
         plt.close()
 
 
