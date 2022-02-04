@@ -1,4 +1,4 @@
-from resources.sin_wawe import sin_wawe
+from test_files.sin_wawe import sin_wawe
 from resources.dynamic_chart import Chart
 
 from time import process_time
@@ -27,6 +27,9 @@ class Main():
 
             chart.figure_get_input(args)
             chart.figure_draw()
+
+
+
 
 
 
