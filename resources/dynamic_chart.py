@@ -19,7 +19,7 @@ class Chart():
         ax = fig.add_subplot(111)
         self.chart_data = {"figure": fig, "axis": ax, "x-axis": x, "y-axis": y, "time": 0}
 
-    def chart_atributes(self, chart_title = '', y_axis_name = '', x_axis_name = ''):
+    def chart_attributes(self, chart_title = '', y_axis_name = '', x_axis_name = ''):
         self.chart_data["figure"].canvas.set_window_title(chart_title)
         plt.title(label=chart_title, fontsize=15, color="black")
         self.chart_data["axis"].set_xlabel(x_axis_name)
@@ -52,7 +52,7 @@ class Chart():
 if __name__ == "__main__":
 
     chart = Chart()
-    chart.chart_atributes(chart_title = 'real time chart', y_axis_name = 'amplitude [inc]', x_axis_name = 'time [s]')
+    chart.chart_attributes(chart_title = 'real time chart', y_axis_name = 'amplitude [inc]', x_axis_name = 'time [s]')
 
     while True:
 

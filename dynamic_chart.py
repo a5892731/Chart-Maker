@@ -22,7 +22,7 @@ from time import process_time
 if __name__ == "__main__":
 
     chart = Chart()
-    chart.chart_atributes(chart_title = 'real time chart', y_axis_name = 'amplitude [inc]', x_axis_name = 'time [s]')
+    chart.chart_attributes(chart_title = 'real time chart', y_axis_name = 'amplitude [inc]', x_axis_name = 'time [s]')
 
     while True:
 
