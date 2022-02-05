@@ -1,7 +1,14 @@
 '''
 real time chart:
 
-comments: need to clear data buffer in time.
+comments:
+The chart is not suitable for collecting large amounts of data.
+
+TO DO:
+-Requires that the chart data cache be cleared over time. The reason is the systematic slowing down of the program.
+-Need correction in chart closing/terminating
+https://stackoverflow.com/questions/45135150/how-to-disable-the-close-button-in-matplotlib
+
 '''
 from test_files.sin_wawe import sin_wawe
 from time import process_time
@@ -47,6 +54,8 @@ class Chart():
     def __del__(self):
         self.chart_data["figure"].clear()
         plt.close()
+        print('chart closed')
+
 
 
 if __name__ == "__main__":
@@ -71,3 +80,4 @@ if __name__ == "__main__":
         time_stop = process_time()
         program_execution_time = time_start - time_stop
         print('program_execution_time: {}'.format(program_execution_time))
+

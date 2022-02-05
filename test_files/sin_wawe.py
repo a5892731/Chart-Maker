@@ -1,6 +1,6 @@
-import math
+from math import pi, sin
 
 
 def sin_wawe(amplitude, offset, period, time):
-    omega = (2 * math.pi)/period
-    return amplitude * math.sin(omega * time) + offset
+    omega = (2 * pi)/period
+    return amplitude * sin(omega * time) + offset

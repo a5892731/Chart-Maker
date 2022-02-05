@@ -14,7 +14,7 @@ If you wont to know how to build signal, go to file test_files.static_signals
 
 
 from test_files.sin_wawe import sin_wawe
-from resources.dynamic_chart import Chart
+from resources.dynamic_chart_matplotlib import Chart
 
 from time import process_time
 
