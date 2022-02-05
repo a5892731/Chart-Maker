@@ -70,7 +70,6 @@ class Chart(QtWidgets.QMainWindow):
     def update_plot_data(self):
         '''plot a function'''
         x_data = (time() - self.start_time)
-
         y_data = sin_wawe(amplitude = 10, offset = 0, period = 5, time = x_data)   # function to plot
 
         self.x = self.x[1:]  # Remove the first y element.
