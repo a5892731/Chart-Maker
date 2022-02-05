@@ -6,8 +6,10 @@ The chart is not suitable for collecting large amounts of data.
 
 TO DO:
 -Requires that the chart data cache be cleared over time. The reason is the systematic slowing down of the program.
+https://towardsdatascience.com/plotting-live-data-with-matplotlib-d871fac7500b
 -Need correction in chart closing/terminating
 https://stackoverflow.com/questions/45135150/how-to-disable-the-close-button-in-matplotlib
+
 
 '''
 from test_files.sin_wawe import sin_wawe
@@ -40,11 +42,14 @@ class Chart():
         if self.chart_data["x-axis"].__len__() >= (data_list_bufor_len + 1):
             self.chart_data["x-axis"].pop(0)
             self.chart_data["y-axis"].pop(0)
+            #self.chart_data["x-axis"] = self.chart_data["x-axis"][1:]
+            #self.chart_data["y-axis"] = self.chart_data["y-axis"][1:]
 
     def figure_draw(self,chart_len = 10,  pause = 0.005):
 
         self.chart_data["axis"].plot(self.chart_data["x-axis"], self.chart_data["y-axis"], color='red')
         self.chart_data["figure"].show()
+        #self.chart_data["figure"].clear(True)
         plt.pause(pause)
 
         left = max(0, self.chart_data["time"] - chart_len)
@@ -56,8 +61,6 @@ class Chart():
         plt.close()
         print('chart closed')
 
-
-
 if __name__ == "__main__":
 
     chart = Chart()
@@ -67,7 +70,6 @@ if __name__ == "__main__":
 
         time_start = process_time()
 
-
         # sin_wawe(amplitude, offset, period, time)
         output1 = sin_wawe(10, 0, 5, process_time())  # works ok
         output2 = sin_wawe(10, 0, 1, process_time())  # bad refreshment # amplitude, offset, period
@@ -75,7 +77,7 @@ if __name__ == "__main__":
         output4 = 3 * process_time() + 5
 
         chart.figure_get_input(y_axis = output2, x_axis = process_time())
-        chart.figure_draw(chart_len = 10)
+        chart.figure_draw(chart_len = 5)
 
         time_stop = process_time()
         program_execution_time = time_start - time_stop
