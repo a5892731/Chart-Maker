@@ -1,6 +1,11 @@
 '''
 real time chart:
 
+version 1.3.0
+
+
+
+
 comments:
 The chart is not suitable for collecting large amounts of data.
 
