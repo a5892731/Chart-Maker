@@ -1,10 +1,8 @@
 '''
-
-version 1.5.0
+version 1.5.1
 
 to do in next version:
 -add multi-charts
-
 '''
 
 
@@ -22,7 +20,7 @@ import numpy as np
 
 class Chartmaker:
 
-    def __init__(self, chart_turn_on = True, plot_interval_ms = 50, chart_len_sec=5,
+    def __init__(self, chart_active = True, plot_interval_ms = 200, chart_len_sec=5,
                  chart_title = '', x_name = '', y_name = ''):
 
         plt.ion()
@@ -38,7 +36,7 @@ class Chartmaker:
         #self.fig, self.ax = plt.subplots()
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.chart_turn_on = chart_turn_on
+        self.chart_active = chart_active
         '''axis data'''
         self.data = ChartData(plot_interval_ms=plot_interval_ms,
                               chart_len_sec=chart_len_sec)  # x, y lists (with zeros) creator for chart turning on
@@ -61,14 +59,13 @@ class Chartmaker:
 
     def events(self):
         '''chart window events'''
+        '''x-button click in right corner of the chart event'''
         plt.connect('close_event', self.on_click)
 
-    def create_figure_from_lists(self, x_data, y_data):
-        self.events() # check for events
-
+    def create_figure(self, x_data, y_data):
         self.chart_time_ms = (time() - self.start_time) * 1000 # seconds
         if self.chart_time_ms > 2 * (self.chart_sample * self.plot_interval_ms): #interval time-out protection
-            raise TimeoutError("to high interval frequency to plot chart: Plot interval: {} ms"
+            raise TimeoutError("to high interval frequency to plot chart on this device: Plot interval: {} ms"
                                .format(self.plot_interval_ms, ))
         if self.chart_time_ms > (self.chart_sample * self.plot_interval_ms): #interval controll
             self.chart_sample += 1
@@ -82,9 +79,10 @@ class Chartmaker:
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
 
+        self.events()  # check for events
     def on_click(self, event):
         if CloseEvent:
-            self.chart_turn_on = False
+            self.chart_active = False
             plt.close('all')
             print('chart close button turned on')
 
@@ -94,25 +92,24 @@ class Chartmaker:
 if __name__ == "__main__":
 
     '''start chart body'''
-    plot_interval_ms = 100  # sample interval
+    plot_interval_ms = 150  # sample interval
     chart_len_sec = 10
-    chart = Chartmaker(chart_turn_on = True, plot_interval_ms = plot_interval_ms, chart_len_sec=chart_len_sec,
+    chart = Chartmaker(chart_active = True, plot_interval_ms = plot_interval_ms, chart_len_sec=chart_len_sec,
                        chart_title = 'chart 1', x_name = 'x_name', y_name = 'y_name')  # create chart
     start_time = time()
     '''start chart body'''
 
     tests = ChartTests()  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING
 
-    while chart.chart_turn_on:
+    while chart.chart_active:
         loop_start_time = time()  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING
 
-        '''lop body'''
+        '''lop body>'''
         current_time = time() - start_time
         y_data = sin_wawe(amplitude=10, offset=0, period=5, time= current_time)  # signal to plot
 
-        chart.create_figure_from_lists(x_data = current_time, y_data = y_data)
-        # give data to chart (y and x value)
-        '''lop body'''
+        chart.create_figure(x_data = current_time, y_data = y_data) # give data to chart (y and x value)
+        '''lop body<'''
 
         program_execution_time = loop_start_time - time()  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING
         tests.print_test_data(chart, program_execution_time)  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING

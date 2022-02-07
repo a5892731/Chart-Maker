@@ -14,7 +14,7 @@ class SignalMaker:
         t5 = np.arange(-20, 20, dt)
         s5 = -(10 * t5)
 
-        self.signals = {'chart_1':{'singal_1': {'x': s1, 'y':t1},
+        '''self.signals = {'chart_1':{'singal_1': {'x': s1, 'y':t1},
                                    'singal_2': {'x': s2, 'y':t2},
                                    'x_name':'time [s]',
                                    'x_range': [0, 50],
@@ -30,4 +30,12 @@ class SignalMaker:
                                    'y_range': [-600, 600],
                                    },
 
+                        }'''
+
+        self.signals = {'chart_1':{'singal_1': {'x': s1, 'y':t1},
+                                   'x_name':'time [s]',
+                                   'x_range': [0, 50],
+                                   'y_name': 'amplituda [inc]',
+                                   'y_range': [-1, 1],
+                                   },
                         }
