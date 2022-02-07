@@ -1,5 +1,5 @@
 '''
-version 1.5.1
+version 1.5.2
 
 to do in next version:
 -add multi-charts
@@ -15,14 +15,14 @@ from time import process_time, time
 from matplotlib.backend_bases import CloseEvent
 import matplotlib.pyplot as plt
 import numpy as np
-
+from threading import Thread, Lock
 
 
 class Chartmaker:
 
     def __init__(self, chart_active = True, plot_interval_ms = 200, chart_len_sec=5,
                  chart_title = '', x_name = '', y_name = ''):
-
+        self.lock = Lock()
         plt.ion()
         '''chart variables'''
         self.plot_interval_ms = plot_interval_ms # interval of getting samples for chart
@@ -63,11 +63,19 @@ class Chartmaker:
         plt.connect('close_event', self.on_click)
 
     def create_figure(self, x_data, y_data):
+
+
         self.chart_time_ms = (time() - self.start_time) * 1000 # seconds
         if self.chart_time_ms > 2 * (self.chart_sample * self.plot_interval_ms): #interval time-out protection
             raise TimeoutError("to high interval frequency to plot chart on this device: Plot interval: {} ms"
                                .format(self.plot_interval_ms, ))
+
+
+
         if self.chart_time_ms > (self.chart_sample * self.plot_interval_ms): #interval controll
+
+            self.lock.acquire()
+
             self.chart_sample += 1
             self.data.update_data(y_data=y_data, x_data=x_data)  # update x, y data lists
             self.chart_refresh() # refresh chart
@@ -79,11 +87,15 @@ class Chartmaker:
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
 
+            self.lock.release()
+
         self.events()  # check for events
+
+
     def on_click(self, event):
         if CloseEvent:
             self.chart_active = False
-            plt.close('all')
+            plt.close()
             print('chart close button turned on')
 
 
@@ -92,28 +104,80 @@ class Chartmaker:
 if __name__ == "__main__":
 
     '''start chart body'''
-    plot_interval_ms = 150  # sample interval
+    plot_interval_ms = 1000  # sample interval
+    interval_list = [600 for _ in range(25)]
+
+
     chart_len_sec = 10
     chart = Chartmaker(chart_active = True, plot_interval_ms = plot_interval_ms, chart_len_sec=chart_len_sec,
                        chart_title = 'chart 1', x_name = 'x_name', y_name = 'y_name')  # create chart
+
+    chart2 = Chartmaker(chart_active = True, plot_interval_ms = plot_interval_ms, chart_len_sec=chart_len_sec,
+                        chart_title = 'chart 2', x_name = 'x_name', y_name = 'y_name')  # create chart
+
+    chart3 = Chartmaker(chart_active = True, plot_interval_ms = plot_interval_ms, chart_len_sec=chart_len_sec,
+                        chart_title = 'chart 3', x_name = 'x_name', y_name = 'y_name')  # create chart
+
+
     start_time = time()
+
     '''start chart body'''
 
     tests = ChartTests()  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING
 
     while chart.chart_active:
         loop_start_time = time()  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING
+        threads = []
+        '''create threads'''
+
 
         '''lop body>'''
         current_time = time() - start_time
         y_data = sin_wawe(amplitude=10, offset=0, period=5, time= current_time)  # signal to plot
+        y_data2 = sin_wawe(amplitude=5, offset=0, period=10, time= current_time)  # signal to plot
 
-        chart.create_figure(x_data = current_time, y_data = y_data) # give data to chart (y and x value)
+        '''create threads >>>'''
+        thread = Thread(target=chart.create_figure(x_data = current_time, y_data = y_data))
+        threads.append(thread)
+
+        thread = Thread(target=chart2.create_figure(x_data = current_time, y_data = y_data2))
+        threads.append(thread)
+
+        thread = Thread(target=chart3.create_figure(x_data = current_time, y_data = y_data2))
+        threads.append(thread)
+
+        '''start threads'''
+        for thread in threads:
+            thread.start()
+
+        '''wait for all threads to end'''
+        for thread in threads:
+            thread.join()
+
+        '''<<< create threads'''
+
+
+        #chart.create_figure(x_data = current_time, y_data = y_data) # give data to chart (y and x value)
+        #chart2.create_figure(x_data = current_time, y_data = y_data2) # give data to chart (y and x value)
         '''lop body<'''
+
+
 
         program_execution_time = loop_start_time - time()  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING
         tests.print_test_data(chart, program_execution_time)  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< TESTING
 
+        if program_execution_time < -0.1:
+            interval_list.append(int(-program_execution_time*1000))
+            interval_list.pop(0)
+            new_interval = 0
+            for inter in interval_list:
+                new_interval += inter
 
 
 
+            new_interval = int(new_interval / (len(interval_list) + 1) + 50)
+
+            print('new interval: {} ms'.format(new_interval))
+
+            chart.plot_interval_ms = new_interval
+            chart2.plot_interval_ms = new_interval
