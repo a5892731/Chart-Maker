@@ -1,7 +1,7 @@
 # author: a5892731
 # date: 04.02.2022
-# last update: 06.02.2022
-# version: 1.5.0
+# last update: 07.02.2022
+# version: 1.5.1
 #
 # description:
 # This is a program that create a dynamic chart
