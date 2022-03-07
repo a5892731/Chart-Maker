@@ -33,7 +33,7 @@ from time import time
 
 if __name__ == "__main__":
 
-    plot_interval_ms = 150  # sample interval
+    plot_interval_ms = 200  # sample interval
     chart_len_sec = 5
 
     chart = Chartmaker(chart_active = True, plot_interval_ms = plot_interval_ms, chart_len_sec=chart_len_sec,
