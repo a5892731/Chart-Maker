@@ -8,24 +8,13 @@
 #
 '''
 Comments [ENG]:
--Depending on the device on which the program will work, the requirements will change for the maximum possible signal
-sampling frequency on the graph. If the sampling interval (the plot_interval_ms variable) is too small for the computer
-to realize it, an alarm will be reported:
-TimeoutError ("to high interval frequency to plot chart on this device: Plot interval: {plot_interval_ms} ms"
 
 
 Comments [PL]:
--W zależności od urządzenia na którym będzie pracować program, będą ulegać zmianie dotyczące wymagań na maksymalną
-możliwą do wykonania częstotliwość próbkowania sygnału na wykresie. Jeśli interwał próbkowania
-(zmienna plot_interval_ms) będzie zbyt mała by komputer mógł ją zrealizować, to zostanie zgłoszony alarm:
-TimeoutError("to high interval frequency to plot chart on this device: Plot interval: {plot_interval_ms} ms"
-
 
 '''
-
-
 from test_files.sin_wawe import sin_wawe
-from resources.dynamic_chart_matplotlib3 import Chartmaker, ChartData
+from resources.dynamic_chart_matplotlib import Chartmaker, ChartData
 
 from time import time
 from threading import Thread
@@ -35,8 +24,8 @@ if __name__ == "__main__":
 
     '''pre configuration'''
     chart_len_sec = 5.0  # seconds
-    plot_refresh_time = 1.0  # seconds
-    update_interval_data = 0.01  # update_interval_data [seconds]; 0 = MAX POSIBLE SPEED
+    plot_refresh_time = 0.05  # seconds; 0 = MAX POSSIBLE SPEED
+    update_interval_data = 0.01  # update_interval_data [seconds]; 0 = MAX POSSIBLE SPEED
 
     data = ChartData(chart_len_sec=chart_len_sec)
     chart = Chartmaker(chart_active=True,
@@ -52,7 +41,7 @@ if __name__ == "__main__":
             x_data = time() - start_time
             y_data = sin_wawe(amplitude=10, offset=0, period=5, time=x_data)  # function to plot
 
-            '''create threads >>>'''
+            '''create threads for data and chart >>>'''
             threads = []
             '''create data array'''
             thread = Thread(target=data.update_data(y_data=y_data, x_data=x_data,
