@@ -1,17 +1,13 @@
 '''
-version 1.5.2
+version 2.0.0
 
 to do in next version:
 -add multi-charts
 '''
 
-
-
 from test_files.sin_wawe import sin_wawe
-from test_files.chart_test import ChartTests
 
-
-from time import process_time, time, sleep
+from time import time, sleep
 from matplotlib.backend_bases import CloseEvent
 import matplotlib.pyplot as plt
 import numpy as np
@@ -59,7 +55,6 @@ class ChartData:
 '''------------------------------------------------------------------------------------------------------------------'''
 
 class Chartmaker:
-
     def __init__(self, chart_active = True,
                  chart_title = '', x_name = '', y_name = ''):
         self.lock = Lock()
@@ -70,20 +65,13 @@ class Chartmaker:
         self.chart_title = chart_title
         self.x_name = x_name
         self.y_name = y_name
-        '''plot variables'''
+        self.chart_active = chart_active
+        '''pyplot variables'''
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.chart_active = chart_active
-        '''configuration'''
-        self.chart_attributes()
-
-    '''def __enter__(self):
-        return self'''
 
     def chart_attributes(self):
         self.ax.set_title(self.chart_title)
-        #self.ax.set_xlim(0, 10)
-        #self.ax.set_ylim(-10, 10)
         self.ax.set_xlabel(self.x_name)
         self.ax.set_ylabel(self.y_name)
         self.ax.grid(True)
@@ -102,9 +90,8 @@ class Chartmaker:
 
         self.time_to_refresh = plot_refresh_time - (time() - self.chart_time)
         if self.time_to_refresh < 0:
-            self.chart_time = time()
-
             self.chart_refresh()  # refresh chart
+            self.chart_time = time()
             self.ax.set_xlim(min(x), max(x))
             self.y_axis, = self.ax.plot(x, y, 'r-')  # Returns a tuple of line objects, thus the comma
             self.fig.canvas.draw()
@@ -116,12 +103,12 @@ class Chartmaker:
     def on_click(self, event):
         if CloseEvent:
             self.chart_active = False
-            plt.close()
             print('chart close button turned on')
 
-    '''def __exit__(self, exc_type, exc_value, traceback):
-        print('chart exit')'''
-
+    def close_figure(self):
+        #plt.close(fig='all')
+        plt.close(fig='all')
+        print('figure is closed')
 
 '''------------------------------------------------------------------------------------------------------------------'''
 
@@ -141,46 +128,56 @@ if __name__ == "__main__":
 
 
     '''pre configuration'''
-    chart_len_sec = 5 # seconds
-    plot_refresh_time = 2 # seconds
-    update_interval_data = 0.01
-    '''#update_interval_data [seconds] -> 
-    minimal collecting data interval -> real value can by bigger. depends from CPU speed'''
+    chart_len_sec = 20 # seconds
+    plot_refresh_time = 1 # seconds
+    update_interval_data = 0.01 #update_interval_data [seconds]; 0 = MAX POSIBLE SPEED
+
     start_time = time()
 
     data = ChartData(chart_len_sec=chart_len_sec)
 
     chart = Chartmaker(chart_active = True,
-                       chart_title = '', x_name = '', y_name = '')
+                       chart_title = 'test chart', x_name = 'time [s]', y_name = 'amplitude [inc]')
     '''pre configuration'''
 
-    while True:
-        '''prepare data sample'''
-        x_data = time() - start_time
-        y_data = sin_wawe(amplitude=10, offset=0, period=5, time=x_data)  # function to plot
+    while True:# this will be a loop of your program
 
-        '''create threads >>>'''
-        threads = []
-
-        '''create data array'''
-        thread = Thread(target=data.update_data(y_data=y_data, x_data=x_data, update_interval_s=update_interval_data))
-        check_chart_data()
-        threads.append(thread)
-
-        '''create chart'''
         if chart.chart_active:
+            '''prepare data sample'''
+            x_data = time() - start_time
+            y_data = sin_wawe(amplitude=10, offset=0, period=5, time=x_data)  # function to plot
+
+            '''create threads >>>'''
+            threads = []
+            '''create data array'''
+            thread = Thread(target=data.update_data(y_data=y_data, x_data=x_data,
+                                                    update_interval_s=update_interval_data))
+            check_chart_data() # <-----------------------------------------------------------for testing purposes
+            threads.append(thread)
+            '''create chart'''
             thread = Thread(target=chart.create_figure(x=data.x_array, y=data.y_array,
                                                        plot_refresh_time=plot_refresh_time))
             threads.append(thread)
+            '''start threads'''
+            for thread in threads:
+                thread.start()
+            '''wait for all threads to end'''
+            for thread in threads:
+                thread.join()
+            '''<<< create threads'''
         else:
-            chart = Chartmaker(chart_active=False)
+            chart.close_figure()
+            print("end for 5")
+            sleep(1)
+            print("end for 4")
+            sleep(1)
+            print("end for 3")
+            sleep(1)
+            print("end for 2")
+            sleep(1)
+            print("end for 1")
+            sleep(1)
+            print("end for 0")
 
-        '''start threads'''
-        for thread in threads:
-            thread.start()
+            break
 
-        '''wait for all threads to end'''
-        for thread in threads:
-            thread.join()
-
-        '''<<< create threads'''
