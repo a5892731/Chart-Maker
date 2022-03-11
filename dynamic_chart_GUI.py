@@ -12,8 +12,6 @@ from resources.dynamic_chart_matplotlib import Chartmaker, ChartData
 from time import time
 from threading import Thread
 
-
-
 class ChartWindow:
 
     def __init__(self, **kwargs):
