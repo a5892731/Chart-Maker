@@ -23,8 +23,8 @@ from threading import Thread
 if __name__ == "__main__":
 
     '''pre configuration'''
-    chart_len_sec = 5.0  # seconds
-    plot_refresh_time = 0.05  # seconds; 0 = MAX POSSIBLE SPEED
+    chart_len_sec = 10.0  # seconds
+    plot_refresh_time = 0.1 # seconds; 0 = MAX POSSIBLE SPEED
     update_interval_data = 0.01  # update_interval_data [seconds]; 0 = MAX POSSIBLE SPEED
 
     data = ChartData(chart_len_sec=chart_len_sec)
