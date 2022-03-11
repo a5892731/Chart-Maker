@@ -203,22 +203,39 @@ class ChartWindow:
         if self.data_1.get():
             x_data = time() - self.chart_start_time
             y_data = sin_wawe(amplitude=1, offset=0, period=5, time=x_data)  # function to plot
+            self.chart.chart_title = 'SIN - period 5 s'
+
+            self.chart.x_name = "time [s]"
+            self.chart.y_name = "Pressure [bar]"
+
 
         elif self.data_2.get():
             x_data = time() - self.chart_start_time
             y_data = sin_wawe(amplitude=1, offset=0, period=1, time=x_data)  # function to plot
+            self.chart.chart_title = 'SIN - period 1 s'
+            self.chart.x_name = "time [s]"
+            self.chart.y_name = "Voltage [V]"
 
         elif self.data_3.get():
             x_data = time() - self.chart_start_time
             y_data = sin_wawe(amplitude=1, offset=0, period=0.5, time=x_data)  # function to plot
+            self.chart.chart_title = 'SIN - period 500 ms'
+            self.chart.x_name = "time [s]"
+            self.chart.y_name = "Current [A]"
 
         elif self.data_4.get():
             x_data = time() - self.chart_start_time
             y_data = sin_wawe(amplitude=1, offset=0, period=0.2, time=x_data)  # function to plot
+            self.chart.chart_title = 'SIN - period 200 ms'
+            self.chart.x_name = "time [s]"
+            self.chart.y_name = "temperature [*C]"
+
         else:
             x_data = time() - self.chart_start_time
             y_data = 0
-
+            self.chart.chart_title = 'NONE'
+            self.chart.x_name = "time [s]"
+            self.chart.y_name = "None"
 
 
         self.chart_x_data = x_data
