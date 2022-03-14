@@ -239,7 +239,6 @@ class ChartWindow:
         self.chart_x_data = x_data
         self.chart_y_data = y_data
 
-
     def update_data(self):
         def create_float(str):
             try:
