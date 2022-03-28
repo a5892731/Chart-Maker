@@ -25,8 +25,6 @@ class ChartData:
         '''empty x and y data lists'''
         self.x = [start_time]  #chart len in x axis
         self.y = [0]  # fill the graph with zeros at startup
-        self.x_array = np.array(self.x)
-        self.y_array = np.array(self.y)
         self.create_array()
 
     def create_array(self):
@@ -115,34 +113,44 @@ class Chartmaker:  # use for 1 chart in window
 
 class Chartsmaker(Chartmaker):   # use for more than 1 chart in window
 
+    def __init__(self, chart_active = True, chart_title = '',):
+        super().__init__(chart_active = chart_active, chart_title = chart_title)
+
     def initiation_of_chart_window(self, number_of_charts):
         '''TO DO'''
         '''chose one or more charts to plot in window'''
-        None
+        if number_of_charts <= 1:
+            pass
+        else:
+            pass
 
-    def create_charts_window(self, number_of_charts):
+    def create_chart_window(self, number_of_charts):
         self.axs = list() # list of axis
         self.number_of_charts = number_of_charts
         self.fig, self.axs = plt.subplots(self.number_of_charts, 1)
 
-    def charts_attributes(self):
+    def chart_attributes(self, charts_attributes):
         for chart in range(self.number_of_charts):
-            self.axs[chart].grid(True)
+            self.axs[chart].grid(charts_attributes[chart]['grid'])
+            self.axs[chart].set_xlabel(charts_attributes[chart]['x_name'])
+            self.axs[chart].set_ylabel(charts_attributes[chart]['y_name'])
+            self.axs[chart].set_ylabel(charts_attributes[chart]['y_name'])
 
-    def charts_refresh(self):
+    def chart_refresh(self):
         for axis in range(len(self.axs)):
             self.axs[axis].clear()
 
-    def create_figures(self, lists_of_x_data, lists_of_y_data, plot_refresh_time):
+    def create_figure(self, arrays_of_x_data, arrays_of_y_data, charts_attributes, plot_refresh_time):
         self.lock.acquire()
 
         self.time_to_refresh = plot_refresh_time - (time() - self.chart_time)
         if self.time_to_refresh < 0:
-            self.charts_refresh()
-            for chart in range(len(lists_of_x_data)):
-                self.axs[chart].plot(lists_of_x_data[chart], lists_of_y_data[chart])
+            self.chart_refresh()
+            self.chart_time = time()
+            for chart in range(self.number_of_charts):
+                self.axs[chart].plot(arrays_of_x_data[chart], arrays_of_y_data[chart])
 
-            self.charts_attributes()
+            self.chart_attributes(charts_attributes)
 
             self.fig.canvas.draw()
             self.fig.canvas.flush_events()
@@ -153,34 +161,26 @@ class Chartsmaker(Chartmaker):   # use for more than 1 chart in window
 
 if __name__ == "__main__":
 
-    def check_chart_data():
-        #print(data.y_array)
-        #print(data.x_array)
-        print('current time {}'.format(x_data))
-        print("first x element = {}".format(data.x[0]))
-        print("last x element = {}".format(data.x[-1]))
-        print("difference between first and last x element = {}".format(data.x[-1] - data.x[0]))
-        print("statistic_data_interval = {}".format(data.statistic_data_interval))
-        print("x data len = {}".format(len(data.x)))
-        print("y data len = {}".format(len(data.y)))
-        print()
-
 
     '''pre configuration'''
     chart_len_sec = 5 # seconds
     plot_refresh_time = 1 # seconds
     update_interval_data = 0.01 #update_interval_data [seconds]; 0 = MAX POSIBLE SPEED
+    charts_x_data_lists = list()
+    charts_y_data_lists = list()
+    charts_attributes_lists = list()
+
 
     start_time = time()
 
     data = ChartData(chart_len_sec=chart_len_sec)
     data2 = ChartData(chart_len_sec=chart_len_sec)
+    data3 = ChartData(chart_len_sec=chart_len_sec)
 
-    chart = Chartsmaker(chart_active = True,
-                       chart_title = 'test chart', x_name = 'time [s]', y_name = 'amplitude [inc]')
+    chart = Chartsmaker(chart_active = True, chart_title = 'test chart')
 
     #chart.create_chart_window()
-    chart.create_charts_window(number_of_charts=2)
+    chart.create_chart_window(number_of_charts=3)
     '''pre configuration'''
 
     while True:# this will be a loop of your program
@@ -189,26 +189,49 @@ if __name__ == "__main__":
             '''prepare data sample'''
             x_data = time() - start_time
             y_data = sin_wawe(amplitude=10, offset=0, period=5, time=x_data)  # function to plot
+
             y_data2 = sin_wawe(amplitude=10, offset=0, period=2, time=x_data)  # function to plot
+
+            y_data3 = sin_wawe(amplitude=10, offset=0, period=1, time=x_data)  # function to plot
 
 
             '''create threads >>>'''
             threads = []
             '''create data array'''
+            #-----------------------------------------------------------------------------------------
             thread = Thread(target=data.update_data(y_data=y_data, x_data=x_data,
                                                     update_interval_s=update_interval_data))
-            threads.append(thread)
 
+            charts_x_data_lists.append(data.x_array)
+            charts_y_data_lists.append(data.y_array)
+            charts_attributes_lists.append({"y_name":"Angle [deg]", "x_name":"time [s]", "grid": True})
+            threads.append(thread)
+            # -----------------------------------------------------------------------------------------
             thread = Thread(target=data2.update_data(y_data=y_data2, x_data=x_data,
                                                     update_interval_s=update_interval_data))
+
+            charts_x_data_lists.append(data2.x_array)
+            charts_y_data_lists.append(data2.y_array)
+            charts_attributes_lists.append({"y_name":"Pressure [bar]", "x_name":"time [s]", "grid": True})
             threads.append(thread)
+            # -----------------------------------------------------------------------------------------
+            thread = Thread(target=data3.update_data(y_data=y_data3, x_data=x_data,
+                                                     update_interval_s=update_interval_data))
+
+            charts_x_data_lists.append(data3.x_array)
+            charts_y_data_lists.append(data3.y_array)
+            charts_attributes_lists.append({"y_name": "Temperature [deg]", "x_name": "time [s]", "grid": False})
+            threads.append(thread)
+            # -----------------------------------------------------------------------------------------
 
             '''create chart'''
 
-            thread = Thread(target=chart.create_figures(lists_of_x_data=[data.x_array, data2.x_array],
-                                                        lists_of_y_data=[data.y_array, data2.y_array],
-                                                        plot_refresh_time=update_interval_data))
+            thread = Thread(target=chart.create_figure(arrays_of_x_data=charts_x_data_lists,
+                                                       arrays_of_y_data=charts_y_data_lists,
+                                                       charts_attributes=charts_attributes_lists,
+                                                       plot_refresh_time=plot_refresh_time))
             threads.append(thread)
+
             '''start threads'''
             for thread in threads:
                 thread.start()
@@ -216,6 +239,12 @@ if __name__ == "__main__":
             for thread in threads:
                 thread.join()
             '''<<< create threads'''
+
+            '''clear memory'''
+            charts_x_data_lists = list()
+            charts_y_data_lists = list()
+            charts_attributes_lists = list()
+
 
         else:
             chart.close_figure()
