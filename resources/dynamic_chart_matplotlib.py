@@ -1,11 +1,8 @@
 '''
 version 2.0.0
-
-to do in next version:
--add multi-charts
+and
+version 3.0.0 - Doublee
 '''
-
-from test_files.sin_wawe import sin_wawe
 
 from time import time, sleep
 from matplotlib.backend_bases import CloseEvent
@@ -15,7 +12,7 @@ from threading import Thread, Lock
 
 
 class ChartData:
-    def __init__(self, chart_len_sec = 10, start_time = 0):
+    def __init__(self, chart_len_sec = 10, start_time = 0, first_y=0):
         self.lock = Lock()
         '''chart variables'''
         self.class_time = time()
@@ -24,7 +21,7 @@ class ChartData:
         self.sample = 1
         '''empty x and y data lists'''
         self.x = [start_time]  #chart len in x axis
-        self.y = [0]  # fill the graph with zeros at startup
+        self.y = [first_y]  # fill the graph with zeros at startup
         self.x_array = np.array(self.x)
         self.y_array = np.array(self.y)
         self.create_array()
@@ -106,78 +103,80 @@ class Chartmaker:
             print('chart close button turned on')
 
     def close_figure(self):
-        #plt.close(fig='all')
         plt.close(fig='all')
         print('figure is closed')
-
 '''------------------------------------------------------------------------------------------------------------------'''
 
-if __name__ == "__main__":
+class DoubleChartmaker:
+    def __init__(self, chart_active = True,
+                 chart_title = '', x_name = ['', ''], y_name = ['', '']):
+        self.lock = Lock()
+        plt.ion()
+        '''chart variables'''
+        self.chart_time = time()
+        self.time_to_refresh = 0
+        self.chart_title = chart_title
+        self.x_name = x_name
+        self.y_name = y_name
 
-    def check_chart_data():
-        #print(data.y_array)
-        #print(data.x_array)
-        print('current time {}'.format(x_data))
-        print("first x element = {}".format(data.x[0]))
-        print("last x element = {}".format(data.x[-1]))
-        print("difference between first and last x element = {}".format(data.x[-1] - data.x[0]))
-        print("statistic_data_interval = {}".format(data.statistic_data_interval))
-        print("x data len = {}".format(len(data.x)))
-        print("y data len = {}".format(len(data.y)))
-        print()
+        self.chart_active = chart_active
+        '''pyplot variables'''
+        self.fig, self.axis = plt.subplots(nrows=2)
+
+        self.create_chart = True
+        # because you can have more than 1 chart in this program
 
 
-    '''pre configuration'''
-    chart_len_sec = 20 # seconds
-    plot_refresh_time = 1 # seconds
-    update_interval_data = 0.01 #update_interval_data [seconds]; 0 = MAX POSIBLE SPEED
 
-    start_time = time()
+    def chart_attributes(self):
+        #self.axs[0].set_title(self.chart_title)
+        self.axis[0].set_xlabel(self.x_name[0])
+        self.axis[0].set_ylabel(self.y_name[0])
+        self.axis[0].grid(True)
 
-    data = ChartData(chart_len_sec=chart_len_sec)
+        self.axis[1].set_xlabel(self.x_name[1])
+        self.axis[1].set_ylabel(self.y_name[1])
+        self.axis[1].grid(True)
 
-    chart = Chartmaker(chart_active = True,
-                       chart_title = 'test chart', x_name = 'time [s]', y_name = 'amplitude [inc]')
-    '''pre configuration'''
 
-    while True:# this will be a loop of your program
+    def chart_refresh(self):
+        #self.axs.clear()
+        self.chart_attributes()
 
-        if chart.chart_active:
-            '''prepare data sample'''
-            x_data = time() - start_time
-            y_data = sin_wawe(amplitude=10, offset=0, period=5, time=x_data)  # function to plot
+    def events(self):
+        '''chart window events'''
+        '''x-button click in right corner of the chart event'''
+        plt.connect('close_event', self.on_click)
 
-            '''create threads >>>'''
-            threads = []
-            '''create data array'''
-            thread = Thread(target=data.update_data(y_data=y_data, x_data=x_data,
-                                                    update_interval_s=update_interval_data))
-            check_chart_data() # <-----------------------------------------------------------for testing purposes
-            threads.append(thread)
-            '''create chart'''
-            thread = Thread(target=chart.create_figure(x=data.x_array, y=data.y_array,
-                                                       plot_refresh_time=plot_refresh_time))
-            threads.append(thread)
-            '''start threads'''
-            for thread in threads:
-                thread.start()
-            '''wait for all threads to end'''
-            for thread in threads:
-                thread.join()
-            '''<<< create threads'''
-        else:
-            chart.close_figure()
-            print("end for 5")
-            sleep(1)
-            print("end for 4")
-            sleep(1)
-            print("end for 3")
-            sleep(1)
-            print("end for 2")
-            sleep(1)
-            print("end for 1")
-            sleep(1)
-            print("end for 0")
+    def create_figure(self, x, y, plot_refresh_time):
+        self.lock.acquire()
 
-            break
+        self.time_to_refresh = plot_refresh_time - (time() - self.chart_time)
+        if self.time_to_refresh < 0:
+            self.chart_refresh()  # refresh chart
+            self.chart_time = time()
+            self.axis[0].set_xlim(min(x[0])-0.01, max(x[0])+0.01)
+            self.axis[1].set_xlim(min(x[1])-0.01, max(x[1])+0.01)
 
+            self.y_upper_axis = self.axis[0].plot(x[0], y[0], 'r-')  # Returns a tuple of line objects, thus the comma
+            self.y_bottom_axis = self.axis[1].plot(x[1], y[1], 'r-')  # Returns a tuple of line objects, thus the comma
+
+            self.fig.canvas.draw()
+            self.fig.canvas.flush_events()
+
+            #self.fig.tight_layout()
+            #plt.show()
+
+
+
+        self.events()  # check for events
+        self.lock.release()
+
+    def on_click(self, event):
+        if CloseEvent:
+            self.chart_active = False
+            print('chart close button turned on')
+
+    def close_figure(self):
+        plt.close(fig='all')
+        print('figure is closed')
